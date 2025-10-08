@@ -256,26 +256,12 @@ resource "vsphere_virtual_machine" "vm" {
             length(var.ipv4submask) == 1 ? var.ipv4submask[0] : var.ipv4submask[network_interface.key]
             ) : null
 
-          #ipv4_netmask = var.network[keys(var.network)[network_interface.key]][count.index] == "" ? null : (
-          #  length(split("/", var.network[keys(var.network)[network_interface.key]][count.index])) == 2 ? (
-          #    split("/", var.network[keys(var.network)[network_interface.key]][count.index])[1]
-          #    ) : (
-          #    length(var.ipv4submask) == 1 ? var.ipv4submask[0] : var.ipv4submask[network_interface.key]
-          #  )
-          #)
           ipv6_address = strcontains(var.network[keys(var.network)[network_interface.key]][count.index] , ":") ? strcontains(var.network[keys(var.network)[network_interface.key]][count.index] , ".") ? split("/", split(",", var.network[keys(var.network)[network_interface.key]][count.index] ) [1])[0]  : split("/", var.network[keys(var.network)[network_interface.key]][count.index])[0]  : null
           ipv6_netmask = strcontains(var.network[keys(var.network)[network_interface.key]][count.index] , ":") || var.network[keys(var.network)[network_interface.key]][count.index] == "" ? strcontains(
             var.network[keys(var.network)[network_interface.key]][count.index] , "/") ? split(
             "/", split(",", var.network[keys(var.network)[network_interface.key]][count.index] ) [1])[1] : (
             length(var.ipv6submask) == 1 ? var.ipv6submask[0] : var.ipv6submask[network_interface.key]
             ) : null
-          #ipv6_netmask = var.network[keys(var.network)[network_interface.key]][count.index] == "" ? null : (
-          #  length(split("/", var.network[keys(var.network)[network_interface.key]][count.index])) == 2 ? (
-          #    split("/", var.network[keys(var.network)[network_interface.key]][count.index])[1]
-          #    ) : (
-          #    length(var.ipv6submask) == 1 ? var.ipv6submask[0] : var.ipv6submask[network_interface.key]
-          #  )
-          #)
         }
       }
       dns_server_list = var.dns_server_list
