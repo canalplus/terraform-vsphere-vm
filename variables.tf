@@ -23,6 +23,12 @@ variable "ipv4submask" {
   default     = ["24"]
 }
 
+variable "ipv6submask" {
+  description = "ipv6 Subnet mask. Warning: The order must follow the alphabetic order from var.network."
+  type        = list(any)
+  default     = ["64"]
+}
+
 #Data Disk section
 variable "datastore_cluster" {
   description = "Datastore cluster to deploy the VM."
@@ -209,6 +215,12 @@ variable "vmfolder" {
 
 variable "vmgateway" {
   description = "VM gateway to set during provisioning."
+  default     = null
+}
+
+variable "ipv6_vmgateway" {
+  description = "IPV6 VM gateway to set during provisioning."
+  type        = string
   default     = null
 }
 

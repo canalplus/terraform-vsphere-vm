@@ -249,19 +249,25 @@ resource "vsphere_virtual_machine" "vm" {
       dynamic "network_interface" {
         for_each = keys(var.network)
         content {
-          ipv4_address = split("/", var.network[keys(var.network)[network_interface.key]][count.index])[0]
-          ipv4_netmask = var.network[keys(var.network)[network_interface.key]][count.index] == "" ? null : (
-            length(split("/", var.network[keys(var.network)[network_interface.key]][count.index])) == 2 ? (
-              split("/", var.network[keys(var.network)[network_interface.key]][count.index])[1]
-              ) : (
-              length(var.ipv4submask) == 1 ? var.ipv4submask[0] : var.ipv4submask[network_interface.key]
-            )
-          )
+          ipv4_address = strcontains(var.network[keys(var.network)[network_interface.key]][count.index] , ".") ? split("/", split(",", var.network[keys(var.network)[network_interface.key]][count.index] ) [0])[0] : null
+          ipv4_netmask = strcontains(var.network[keys(var.network)[network_interface.key]][count.index] , ".") || var.network[keys(var.network)[network_interface.key]][count.index] == "" ? strcontains(
+            var.network[keys(var.network)[network_interface.key]][count.index] , "/") ? split(
+            "/", split(",", var.network[keys(var.network)[network_interface.key]][count.index] ) [0])[1] : (
+            length(var.ipv4submask) == 1 ? var.ipv4submask[0] : var.ipv4submask[network_interface.key]
+            ) : null
+
+          ipv6_address = strcontains(var.network[keys(var.network)[network_interface.key]][count.index] , ":") ? strcontains(var.network[keys(var.network)[network_interface.key]][count.index] , ".") ? split("/", split(",", var.network[keys(var.network)[network_interface.key]][count.index] ) [1])[0]  : split("/", var.network[keys(var.network)[network_interface.key]][count.index])[0]  : null
+          ipv6_netmask = strcontains(var.network[keys(var.network)[network_interface.key]][count.index] , ":") || var.network[keys(var.network)[network_interface.key]][count.index] == "" ? strcontains(
+            var.network[keys(var.network)[network_interface.key]][count.index] , "/") ? split(
+            "/", split(",", var.network[keys(var.network)[network_interface.key]][count.index] ) [1])[1] : (
+            length(var.ipv6submask) == 1 ? var.ipv6submask[0] : var.ipv6submask[network_interface.key]
+            ) : null
         }
       }
       dns_server_list = var.dns_server_list
       dns_suffix_list = var.dns_suffix_list
       ipv4_gateway    = var.vmgateway
+      ipv6_gateway    = var.ipv6_vmgateway
     }
   }
 
@@ -276,4 +282,12 @@ resource "vsphere_virtual_machine" "vm" {
 
   shutdown_wait_timeout = var.shutdown_wait_timeout
   force_power_off       = var.force_power_off
+
+  lifecycle {
+    ignore_changes = [
+      # Ignore changes to custom_attributes, sometimes external tool may add some note to custom attributes, let's ignore them
+      custom_attributes,
+    ]
+  }
+
 }
